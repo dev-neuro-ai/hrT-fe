@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is a recruiter
+    function isRecruiter() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'recruiter';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false; // Never allow deletion of user documents
+    }
+    
+    // Candidates collection
+    match /candidates/{candidateId} {
+      allow read: if isRecruiter();
+      allow create: if isRecruiter();
+      allow update: if isRecruiter();
+      allow delete: if false; // Prevent accidental deletions
+    }
+    
+    // Jobs collection
+    match /jobs/{jobId} {
+      allow read: if isRecruiter();
+      allow create: if isRecruiter();
+      allow update: if isRecruiter();
+      allow delete: if false; // Prevent accidental deletions
+    }
+    
+    // Applications collection
+    match /applications/{applicationId} {
+      allow read: if isRecruiter();
+      allow create: if isRecruiter();
+      allow update: if isRecruiter();
+      allow delete: if false; // Prevent accidental deletions
+    }
+
+    // Screenings collection - allow public read access for specific screening
+    match /screenings/{screeningId} {
+      // Anyone can read a specific screening
+      allow read: if true;
+      // Only recruiters can create and update screenings
+      allow create: if isRecruiter();
+      allow update: if isRecruiter();
+      allow delete: if false;
+    }
+  }
+}

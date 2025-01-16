@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Temporary files for processing
+    match /temp/{userId}/{filename} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Resume files
+    match /resumes/{userId}/{filename} {
+      // Allow authenticated users to read all resumes
+      allow read: if request.auth != null;
+      // Allow users to upload resumes under their own userId
+      allow create, update: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.size < 10 * 1024 * 1024 && // 10MB max
+        (request.resource.contentType.matches('application/pdf') ||
+         request.resource.contentType.matches('application/msword') ||
+         request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+         request.resource.contentType.matches('image/.*'));
+      // Allow users to delete their own uploads
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
