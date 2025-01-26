@@ -1,4 +1,7 @@
 import { SendInterviewInvitationParams } from '@/types';
+import { auth } from '@/lib/firebase';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export async function sendInterviewInvitation(
   params: SendInterviewInvitationParams
@@ -7,15 +10,22 @@ export async function sendInterviewInvitation(
     throw new Error('Job ID and Candidate ID are required');
   }
 
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to send invitations');
+  }
+
   try {
     const response = await fetch(
-      'https://betterhr-backend.replit.app/api/send-email',
+      `${BACKEND_URL}/api/send-email`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(params),
+        body: JSON.stringify({
+          ...params,
+          recruiterId: auth.currentUser.uid
+        }),
       }
     );
 

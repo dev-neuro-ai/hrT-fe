@@ -10,26 +10,45 @@ import {
   orderBy,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { JobDescription, JobCandidate, ScreeningStatus } from '@/types';
 
 export async function getJobs() {
-  const jobsRef = collection(db, 'jobs');
-  const q = query(jobsRef, orderBy('createdAt', 'desc'));
-  const snapshot = await getDocs(q);
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to get jobs');
+  }
 
-  return snapshot.docs.map((doc) => ({
+  const jobsRef = collection(db, 'jobs');
+  // Query only jobs created by the current recruiter
+  const recruiterQuery = query(
+    jobsRef,
+    where('recruiterId', '==', auth.currentUser.uid)
+  );
+  const snapshot = await getDocs(recruiterQuery);
+
+  // Convert documents to job objects
+  const jobs = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt?.toDate(),
     updatedAt: doc.data().updatedAt?.toDate(),
     candidates: convertCandidateDates(doc.data().candidates),
   })) as JobDescription[];
+
+  // Sort jobs by createdAt in descending order
+  return jobs.sort((a, b) => {
+    if (!a.createdAt || !b.createdAt) return 0;
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
 }
 
 export async function createJob(
-  job: Omit<JobDescription, 'id' | 'createdAt' | 'updatedAt'>
+  job: Omit<JobDescription, 'id' | 'createdAt' | 'updatedAt' | 'recruiterId'>
 ) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to create jobs');
+  }
+
   const jobsRef = collection(db, 'jobs');
   const now = Timestamp.now();
 
@@ -39,12 +58,17 @@ export async function createJob(
     matchScores: {},
     createdAt: now,
     updatedAt: now,
+    recruiterId: auth.currentUser.uid, // Add recruiter ID when creating job
   });
 
   return docRef.id;
 }
 
 export async function getJob(id: string) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to get job details');
+  }
+
   const docRef = doc(db, 'jobs', id);
   const docSnap = await getDoc(docRef);
 
@@ -53,6 +77,11 @@ export async function getJob(id: string) {
   }
 
   const data = docSnap.data();
+  // Check if the job belongs to the current recruiter
+  if (data.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot access job created by another recruiter');
+  }
+
   return {
     id: docSnap.id,
     ...data,
@@ -63,6 +92,21 @@ export async function getJob(id: string) {
 }
 
 export async function updateJob(id: string, updates: Partial<JobDescription>) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to update jobs');
+  }
+
+  // First check if the job belongs to the current recruiter
+  const jobDoc = await getDoc(doc(db, 'jobs', id));
+  if (!jobDoc.exists()) {
+    throw new Error('Job not found');
+  }
+
+  const jobData = jobDoc.data();
+  if (jobData.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot update job created by another recruiter');
+  }
+
   const docRef = doc(db, 'jobs', id);
   await updateDoc(docRef, {
     ...updates,
@@ -74,6 +118,21 @@ export async function updateJobMatchScores(
   jobId: string,
   matchScores: Record<string, any>
 ) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to update match scores');
+  }
+
+  // First check if the job belongs to the current recruiter
+  const jobDoc = await getDoc(doc(db, 'jobs', jobId));
+  if (!jobDoc.exists()) {
+    throw new Error('Job not found');
+  }
+
+  const jobData = jobDoc.data();
+  if (jobData.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot update match scores for job created by another recruiter');
+  }
+
   const docRef = doc(db, 'jobs', jobId);
   await updateDoc(docRef, {
     matchScores,
@@ -82,6 +141,10 @@ export async function updateJobMatchScores(
 }
 
 export async function getJobMatchScores(jobId: string) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to get match scores');
+  }
+
   const docRef = doc(db, 'jobs', jobId);
   const docSnap = await getDoc(docRef);
 
@@ -89,16 +152,23 @@ export async function getJobMatchScores(jobId: string) {
     throw new Error('Job not found');
   }
 
-  return docSnap.data().matchScores || {};
+  const jobData = docSnap.data();
+  if (jobData.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot access match scores for job created by another recruiter');
+  }
+
+  return jobData.matchScores || {};
 }
 
 export async function updateCandidateScreeningStatus(
   jobId: string,
   candidateId: string,
-  status: ScreeningStatus,
-  screeningDate?: Date,
-  screeningTime?: string
+  status: ScreeningStatus
 ) {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to update screening status');
+  }
+
   const docRef = doc(db, 'jobs', jobId);
   const jobDoc = await getDoc(docRef);
 
@@ -106,12 +176,15 @@ export async function updateCandidateScreeningStatus(
     throw new Error('Job not found');
   }
 
-  const candidates = jobDoc.data().candidates || {};
+  const jobData = jobDoc.data();
+  if (jobData.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot update screening status for job created by another recruiter');
+  }
+
+  const candidates = jobData.candidates || {};
   candidates[candidateId] = {
     candidateId,
     screeningStatus: status,
-    screeningDate: screeningDate ? Timestamp.fromDate(screeningDate) : null,
-    screeningTime,
   };
 
   await updateDoc(docRef, {
@@ -124,6 +197,10 @@ export async function getCandidateScreeningStatus(
   jobId: string,
   candidateId: string
 ): Promise<JobCandidate | null> {
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated to get screening status');
+  }
+
   const docRef = doc(db, 'jobs', jobId);
   const jobDoc = await getDoc(docRef);
 
@@ -131,7 +208,12 @@ export async function getCandidateScreeningStatus(
     return null;
   }
 
-  const candidates = jobDoc.data().candidates || {};
+  const jobData = jobDoc.data();
+  if (jobData.recruiterId !== auth.currentUser.uid) {
+    throw new Error('Unauthorized: Cannot access screening status for job created by another recruiter');
+  }
+
+  const candidates = jobData.candidates || {};
   const candidate = candidates[candidateId];
 
   if (!candidate) {
@@ -139,8 +221,8 @@ export async function getCandidateScreeningStatus(
   }
 
   return {
-    ...candidate,
-    screeningDate: candidate.screeningDate?.toDate(),
+    candidateId: candidate.candidateId,
+    screeningStatus: candidate.screeningStatus,
   };
 }
 
@@ -151,8 +233,8 @@ function convertCandidateDates(candidates: Record<string, any> | undefined) {
   const converted: Record<string, any> = {};
   for (const [id, candidate] of Object.entries(candidates)) {
     converted[id] = {
-      ...candidate,
-      screeningDate: candidate.screeningDate?.toDate() || null
+      candidateId: candidate.candidateId,
+      screeningStatus: candidate.screeningStatus,
     };
   }
   return converted;

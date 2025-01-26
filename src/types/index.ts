@@ -22,13 +22,12 @@ export interface Candidate {
   education: string;
   interviewDate?: Date;
   interviewNotes?: string;
+  recruiterId: string; // Add recruiterId to track ownership
 }
 
 export interface JobCandidate {
   candidateId: string;
   screeningStatus: ScreeningStatus;
-  screeningDate?: Date;
-  screeningTime?: string;
 }
 
 // Job types
@@ -51,6 +50,7 @@ export interface JobDescription {
   matchScores?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  recruiterId?: string; // Add recruiterId to track ownership
 }
 
 // Application types
@@ -63,10 +63,12 @@ export interface JobApplication {
   appliedAt: Date;
   lastUpdated: Date;
 }
+
 export interface Screening {
   id: string;
   jobId: string;
   candidateId: string;
+  recruiterId: string; // Add recruiterId field
   llmId: string;
   agentId: string;
   prompt: string;
@@ -78,9 +80,7 @@ export interface SendInterviewInvitationParams {
   to: string;
   candidateName: string;
   jobTitle: string;
-  interviewDate: Date;
-  interviewTime: string;
-  additionalNotes?: string;
   jobId: string;
   candidateId: string;
+  recruiterId?: string; // Add optional recruiterId
 }

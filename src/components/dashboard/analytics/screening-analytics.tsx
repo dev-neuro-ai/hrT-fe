@@ -23,7 +23,7 @@ import {
   Cell,
 } from 'recharts';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 
@@ -31,6 +31,7 @@ interface ScreeningData {
   id: string;
   jobId: string;
   candidateId: string;
+  recruiterId: string;
   createdAt: Date;
   status: string;
   score?: {
@@ -57,18 +58,31 @@ export function ScreeningAnalytics() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load jobs
-        const jobsSnapshot = await getDocs(collection(db, 'jobs'));
+        if (!auth.currentUser) {
+          throw new Error('User must be authenticated');
+        }
+
+        // Load jobs for the current recruiter
+        const jobsRef = collection(db, 'jobs');
+        const jobsQuery = query(
+          jobsRef,
+          where('recruiterId', '==', auth.currentUser.uid)
+        );
+        const jobsSnapshot = await getDocs(jobsQuery);
         const jobsData = jobsSnapshot.docs.map(doc => ({
           id: doc.id,
           title: doc.data().title,
         }));
         setJobs(jobsData);
 
-        // Load completed screenings
+        // Load completed screenings for the current recruiter
         const screeningsRef = collection(db, 'screenings');
-        const q = query(screeningsRef, where('status', '==', 'completed'));
-        const snapshot = await getDocs(q);
+        const screeningsQuery = query(
+          screeningsRef,
+          where('status', '==', 'completed'),
+          where('recruiterId', '==', auth.currentUser.uid)
+        );
+        const snapshot = await getDocs(screeningsQuery);
         
         const screeningsData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -266,18 +280,17 @@ export function ScreeningAnalytics() {
                     width={60}
                     tick={{ fontSize: 12 }}
                   >
-<Label 
-  value="Score Range (%)" 
-  angle={-90} 
-  position="insideLeft" 
-  dx={-15}
-  dy={40}
-  style={{ 
-    fontSize: '12px', 
-    fill: 'hsl(var(--foreground))'
-  }}
-/>
-
+                    <Label 
+                      value="Score Range (%)" 
+                      angle={-90} 
+                      position="insideLeft" 
+                      dx={-15}
+                      dy={40}
+                      style={{ 
+                        fontSize: '12px', 
+                        fill: 'hsl(var(--foreground))'
+                      }}
+                    />
                   </YAxis>
                   <Tooltip
                     contentStyle={{
@@ -309,5 +322,3 @@ export function ScreeningAnalytics() {
     </div>
   );
 }
-
-

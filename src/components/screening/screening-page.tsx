@@ -16,6 +16,8 @@ import { getScreening } from '@/lib/firebase/screenings';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 export function ScreeningPage() {
   const { screeningId } = useParams<{ screeningId: string }>();
   const [loading, setLoading] = useState(true);
@@ -130,7 +132,7 @@ export function ScreeningPage() {
       await setupAudioAnalyser();
 
       const response = await fetch(
-        'https://betterhr-backend.replit.app/api/start-web-call',
+        `${BACKEND_URL}/api/start-web-call`,
         {
           method: 'POST',
           headers: {
@@ -182,7 +184,7 @@ export function ScreeningPage() {
       // Save analytics after call ends
       if (screeningId) {
         const analyticsResponse = await fetch(
-          'https://betterhr-backend.replit.app/api/save-analytics',
+          `${BACKEND_URL}/api/save-analytics`,
           {
             method: 'POST',
             headers: {

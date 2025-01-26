@@ -1,9 +1,10 @@
 import OpenAI from 'openai';
 
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+
 const openai = new OpenAI({
-  apiKey:
-    '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',
-  dangerouslyAllowBrowser: true,
+  apiKey: OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true, // Required for client-side usage
 });
 
 const ASSISTANT_ID = 'asst_M6zCIA0CQvT4ntFmd9kINqdk';
