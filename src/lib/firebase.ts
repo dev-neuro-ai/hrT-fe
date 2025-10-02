@@ -12,6 +12,28 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Log config status in development
+if (import.meta.env.DEV) {
+  console.log('Firebase Config:', {
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+    hasProjectId: !!firebaseConfig.projectId,
+    hasStorageBucket: !!firebaseConfig.storageBucket,
+    hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
+    hasAppId: !!firebaseConfig.appId
+  });
+}
+
+// Check if any required config is missing
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.error('Firebase configuration is incomplete. Please check environment variables.');
+  console.error('Missing:', {
+    apiKey: !firebaseConfig.apiKey,
+    authDomain: !firebaseConfig.authDomain,
+    projectId: !firebaseConfig.projectId,
+  });
+}
+
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);

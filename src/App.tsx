@@ -6,6 +6,7 @@ import { JobCandidatesPage } from '@/components/dashboard/candidates/job-candida
 import { ScreeningPage } from '@/components/screening/screening-page';
 import { AuthProvider } from '@/contexts/auth-context';
 import { useAuth } from '@/contexts/auth-context';
+import { ErrorBoundary } from '@/components/error-boundary';
 import {
   BrowserRouter as Router,
   Routes,
@@ -40,17 +41,19 @@ function PrivateRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public route for screening */}
-          <Route path="/screening/:screeningId" element={<ScreeningPage />} />
-          {/* All other routes are private */}
-          <Route path="/*" element={<PrivateRoutes />} />
-        </Routes>
-        <Toaster />
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public route for screening */}
+            <Route path="/screening/:screeningId" element={<ScreeningPage />} />
+            {/* All other routes are private */}
+            <Route path="/*" element={<PrivateRoutes />} />
+          </Routes>
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
