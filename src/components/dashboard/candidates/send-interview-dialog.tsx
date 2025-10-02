@@ -53,9 +53,6 @@ export function SendInterviewDialog({
         to: candidateEmail,
         candidateName,
         jobTitle,
-        interviewDate: date,
-        interviewTime: time,
-        additionalNotes: message,
         jobId,
         candidateId
       });

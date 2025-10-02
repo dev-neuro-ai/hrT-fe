@@ -8,6 +8,7 @@ import { FileText, X, Upload, Loader2 } from 'lucide-react';
 import { createCandidate } from '@/lib/firebase/candidates';
 import { extractResumeData } from '@/lib/openai';
 import { toast } from 'sonner';
+import { auth } from '@/lib/firebase';
 
 interface UploadResumesDialogProps {
   open: boolean;
@@ -97,6 +98,7 @@ export function UploadResumesDialog({ open, onOpenChange, onUploadComplete }: Up
             skills: parsedData.skills || [],
             experience: parsedData.experience || 0,
             education: parsedData.education || '',
+            recruiterId: auth.currentUser?.uid || '',
           }, file);
 
           updateFileProgress(i, 100);

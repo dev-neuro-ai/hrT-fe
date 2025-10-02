@@ -69,7 +69,6 @@ export function CandidatesList() {
           <SimpleCandidateCard
             key={candidate.id}
             candidate={candidate}
-            onViewDetails={() => {}} // TODO: Implement view details
           />
         ))}
       </div>

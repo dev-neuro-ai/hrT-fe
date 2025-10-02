@@ -24,7 +24,6 @@ export function JobCandidatesList({
   jobId,
   job,
   candidates,
-  applications,
   loading,
   onScreeningScheduled,
 }: JobCandidatesListProps) {
