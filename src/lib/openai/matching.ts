@@ -1,10 +1,12 @@
 import OpenAI from "openai";
 import { Candidate, JobDescription } from "@/types";
+import { getOpenAIConfig } from '@/config/openai.config';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const openAIConfig = getOpenAIConfig();
+const OPENAI_API_KEY = openAIConfig.apiKey;
 
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY || 'dummy-key',
   dangerouslyAllowBrowser: true, // Required for client-side usage
 });
 export async function calculateMatchScore(

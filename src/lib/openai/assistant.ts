@@ -1,9 +1,11 @@
 import OpenAI from 'openai';
+import { getOpenAIConfig } from '@/config/openai.config';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const openAIConfig = getOpenAIConfig();
+const OPENAI_API_KEY = openAIConfig.apiKey;
 
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY || 'dummy-key',
   dangerouslyAllowBrowser: true, // Required for client-side usage
 });
 

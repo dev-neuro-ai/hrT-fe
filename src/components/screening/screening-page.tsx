@@ -14,8 +14,9 @@ import {
 import { getScreening } from '@/lib/firebase/screenings';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import appConfig from '@/config/app.config.json';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || appConfig.backendUrl;
 
 export function ScreeningPage() {
   const { screeningId } = useParams<{ screeningId: string }>();
