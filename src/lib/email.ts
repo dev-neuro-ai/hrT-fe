@@ -1,8 +1,7 @@
 import { SendInterviewInvitationParams } from '@/types';
 import { auth } from '@/lib/firebase';
-import appConfig from '@/config/app.config.json';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || appConfig.backendUrl;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export async function sendInterviewInvitation(
   params: SendInterviewInvitationParams
