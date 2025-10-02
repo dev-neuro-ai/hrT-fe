@@ -11,6 +11,7 @@ export const mockCandidates: Candidate[] = [
     skills: ['React', 'TypeScript', 'Node.js', 'GraphQL'],
     experience: 5,
     education: 'BS Computer Science',
+    recruiterId: 'mock-recruiter-id',
   },
   {
     id: '2',
@@ -22,6 +23,7 @@ export const mockCandidates: Candidate[] = [
     skills: ['Product Management', 'Agile', 'Data Analysis', 'User Research'],
     experience: 7,
     education: 'MBA',
+    recruiterId: 'mock-recruiter-id',
   },
   {
     id: '3',
@@ -33,6 +35,7 @@ export const mockCandidates: Candidate[] = [
     skills: ['Python', 'Machine Learning', 'TensorFlow', 'Data Science'],
     experience: 4,
     education: 'MS Data Science',
+    recruiterId: 'mock-recruiter-id',
   },
   {
     id: '4',
@@ -44,6 +47,7 @@ export const mockCandidates: Candidate[] = [
     skills: ['UI/UX Design', 'Figma', 'User Research', 'Prototyping'],
     experience: 6,
     education: 'BFA Design',
+    recruiterId: 'mock-recruiter-id',
   },
   {
     id: '5',
@@ -55,5 +59,6 @@ export const mockCandidates: Candidate[] = [
     skills: ['DevOps', 'AWS', 'Kubernetes', 'Docker'],
     experience: 8,
     education: 'BS Software Engineering',
+    recruiterId: 'mock-recruiter-id',
   },
 ];

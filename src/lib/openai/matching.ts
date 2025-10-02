@@ -53,5 +53,5 @@ export async function calculateMatchScore(
     response_format: { type: "json_object" },
   });
 
-  return JSON.parse(completion.choices[0].message.content);
+  return JSON.parse(completion.choices[0].message.content || '{}');
 }

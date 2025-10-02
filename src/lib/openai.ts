@@ -16,7 +16,7 @@ const openai = new OpenAI({
 });
 
 // Initialize PDF.js worker
-const pdfjsLib = window['pdfjs-dist/build/pdf'] || window['pdfjsLib'];
+const pdfjsLib = (window as any)['pdfjs-dist/build/pdf'] || (window as any)['pdfjsLib'];
 if (pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 }
@@ -146,7 +146,7 @@ export async function extractResumeData(
               text: 'Extract the key information from this resume and provide a comprehensive analysis.',
             },
             ...tempImageUrls.map((url) => ({
-              type: 'image_url',
+              type: 'image_url' as const,
               image_url: { url },
             })),
           ],
@@ -157,7 +157,7 @@ export async function extractResumeData(
       response_format: { type: 'json_object' },
     });
 
-    const parsedData = JSON.parse(completion.choices[0].message.content);
+    const parsedData = JSON.parse(completion.choices[0].message.content || '{}');
 
     return {
       name: parsedData.name || null,

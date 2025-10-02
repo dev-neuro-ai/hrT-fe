@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, query, where, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, query, where, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, auth } from '@/lib/firebase';
 import { Candidate } from '@/types';
@@ -18,18 +18,26 @@ export async function getCandidates() {
   const snapshot = await getDocs(recruiterQuery);
   
   // Convert the documents to candidate objects
-  const candidates = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    interviewDate: doc.data().interviewDate?.toDate(),
-    createdAt: doc.data().createdAt?.toDate(),
-  })) as Candidate[];
-
-  // Sort the candidates by createdAt in descending order
-  return candidates.sort((a, b) => {
-    if (!a.createdAt || !b.createdAt) return 0;
-    return b.createdAt.getTime() - a.createdAt.getTime();
+  const candidates = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      email: data.email,
+      resumeUrl: data.resumeUrl,
+      score: data.score,
+      status: data.status,
+      skills: data.skills,
+      experience: data.experience,
+      education: data.education,
+      recruiterId: data.recruiterId,
+      interviewDate: data.interviewDate?.toDate(),
+      interviewNotes: data.interviewNotes,
+    } as Candidate;
   });
+
+  // Return candidates (no sorting since createdAt is not in the Candidate type)
+  return candidates;
 }
 
 export async function createCandidate(candidate: Omit<Candidate, 'id'>, resumeFile?: File) {

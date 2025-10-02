@@ -4,7 +4,6 @@ import { RetellWebClient } from 'retell-client-js-sdk';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
-  Mic,
   Loader2,
   Phone,
   PhoneOff,
@@ -28,7 +27,6 @@ export function ScreeningPage() {
   const webClientRef = useRef<RetellWebClient | null>(null);
   const [callDuration, setCallDuration] = useState(0);
   const timerRef = useRef<NodeJS.Timeout>();
-  const [audioLevel, setAudioLevel] = useState(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>();
@@ -56,7 +54,6 @@ export function ScreeningPage() {
       webClientRef.current = null;
     }
     setIsCallActive(false);
-    setAudioLevel(0);
     setCallDuration(0);
   };
 
@@ -107,8 +104,7 @@ export function ScreeningPage() {
         if (!analyserRef.current) return;
         const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
         analyserRef.current.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        setAudioLevel(average / 128); // Normalize to 0-1
+        // Audio level processing removed as it's not used
         animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
       };
 

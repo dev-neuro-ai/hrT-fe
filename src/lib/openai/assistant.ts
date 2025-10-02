@@ -33,7 +33,11 @@ export async function sendMessage(threadId: string, message: string) {
 
   if (runStatus.status === 'completed') {
     const messages = await openai.beta.threads.messages.list(threadId);
-    return messages.data[0].content[0].text.value;
+    const content = messages.data[0].content[0];
+    if ('text' in content) {
+      return content.text.value;
+    }
+    throw new Error('Invalid message content type');
   } else {
     throw new Error('Assistant run failed');
   }
@@ -99,5 +103,5 @@ export async function generateJobDescription(
     response_format: { type: 'json_object' },
   });
 
-  return JSON.parse(completion.choices[0].message.content);
+  return JSON.parse(completion.choices[0].message.content || '{}');
 }

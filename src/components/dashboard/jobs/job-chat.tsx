@@ -65,7 +65,7 @@ export function JobChat({ onComplete }: JobChatProps) {
 
       // If we have enough information, create the job
       if (jobData.title && jobData.description && jobData.requirements?.length && jobData.responsibilities?.length) {
-        const jobId = await createJob({
+        await createJob({
           title: jobData.title,
           department: jobData.department || 'General',
           location: jobData.location || 'Remote',

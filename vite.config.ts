@@ -15,11 +15,6 @@ export default defineConfig({
     },
     // Ensure all extensions are handled
     extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json", ".vue"],
-    // Add fallback directories
-    modules: [
-      path.resolve(__dirname, "src"),
-      path.resolve(__dirname, "node_modules"),
-    ],
   },
   build: {
     // Improve path resolution during build
