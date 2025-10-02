@@ -7,7 +7,7 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true, // Required for client-side usage
 });
 
-const ASSISTANT_ID = 'asst_M6zCIA0CQvT4ntFmd9kINqdk';
+const ASSISTANT_ID = 'asst_K8APL9er58uqixqgKBSRD1iu';
 
 export async function createThread() {
   const thread = await openai.beta.threads.create();

@@ -181,7 +181,7 @@ app.post("/api/send-email", async (req, res) => {
 
     // Send email with screening link
     const emailResponse = await resend.emails.send({
-      from: "info@appmail.betterhr.ai",
+      from: "notifications@no-reply.vexalink.com",
       to: [to],
       subject: `Interview Invitation: ${jobTitle} Position`,
       html: `

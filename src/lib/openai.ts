@@ -16,8 +16,10 @@ const openai = new OpenAI({
 });
 
 // Initialize PDF.js worker
-const pdfjsLib = window['pdfjs-dist/build/pdf'];
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+const pdfjsLib = window['pdfjs-dist/build/pdf'] || window['pdfjsLib'];
+if (pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+}
 
 async function convertPDFToImages(file: File): Promise<string[]> {
   if (!auth.currentUser) {
